@@ -5,20 +5,22 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Date;
+import java.util.List;
 
 @Entity
+@Table(name = "orders")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
+
 public class Order {
     @Id
     private long orderId;
     private Date date_commande;
     private String statut;
     private double montant_total;
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<Product> produits_commandes;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private List<OrderItems> orderItemsList;
 
-• liste des produits commandés (idProduit, quantité, prix)
 }
