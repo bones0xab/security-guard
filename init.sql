@@ -1,0 +1,2 @@
+CREATE DATABASE db_product;
+CREATE DATABASE db_order;

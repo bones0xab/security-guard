@@ -1,0 +1,25 @@
+version: '3.8'
+services:
+  # 1. Database Service (One container for both DBs to save resources)
+  postgres:
+    image: postgres:15-alpine
+    container_name: ms-postgres
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+    ports:
+      - "5432:5432"
+    volumes:
+      # This script will create db_product and db_order automatically
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  # 2. Keycloak Authentication Server
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0.1
+    container_name: ms-keycloak
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+    command: start-dev
+    ports:
+      - "9090:9090"
