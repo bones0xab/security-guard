@@ -1,4 +1,4 @@
-package org.example.produitservice.security;
+package security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,8 +16,9 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity // Required for @PreAuthorize to work
 public class SecurityConfig {
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -50,7 +51,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000")); // Your React URL
+        config.setAllowedOrigins(List.of("http://localhost:3000/*")); // Your React URL
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         config.setExposedHeaders(List.of("Authorization"));
@@ -60,29 +61,4 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", config);
         return source;
     }
-
-    // This method tells Spring how to read "realm_access.roles" from Keycloak
-//    @Bean
-//    public JwtAuthenticationConverter jwtAuthConverter() {
-//        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-//        converter.setJwtGrantedAuthoritiesConverter(jwt -> {
-//
-//            // 1. Standard scopes (optional)
-//            var defaultConverter = new JwtGrantedAuthoritiesConverter();
-//            Collection<GrantedAuthority> authorities = defaultConverter.convert(jwt);
-//
-//            // 2. Extract Keycloak REALM ROLES
-//            Map<String, Object> realmAccess = jwt.getClaim("realm_access");
-//            if (realmAccess != null && realmAccess.containsKey("roles")) {
-//                List<String> roles = (List<String>) realmAccess.get("roles");
-//
-//                // Convert ["ADMIN"] to ["ROLE_ADMIN"]
-//                authorities.addAll(roles.stream()
-//                        .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-//                        .collect(Collectors.toList()));
-//            }
-//            return authorities;
-//        });
-//        return converter;
-//    }
 }

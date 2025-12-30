@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Silent Check SSO</title>
+    <meta charset="utf-8" />
+  </head>
+  <body>
+    <script>
+      // This page is used by Keycloak for silent authentication
+      // It should remain as simple as possible
+      window.addEventListener('DOMContentLoaded', function() {
+        var parent = window.parent;
+        if (parent && parent.postMessage) {
+          parent.postMessage(location.href, location.origin);
+        }
+      });
+    </script>
+    <noscript>
+      <p>
+        <strong>Note:</strong> Your browser does not support JavaScript or it is disabled.
+        Silent authentication requires JavaScript to be enabled.
+      </p>
+    </noscript>
+  </body>
+</html>
