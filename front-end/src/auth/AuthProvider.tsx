@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useRef, ReactNode } from 'react';
+import React, {createContext, useContext, useEffect, useState, ReactNode, useRef} from 'react';
 import keycloakInstance from './keycloak';
 import { UserRole } from '../types';
 
@@ -14,71 +14,67 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+    const isRun = useRef(false); // Verrou de sécurité
+    const [isInitialized, setInitialized] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [roles, setRoles] = useState<UserRole[]>([]);
-    const [isInitialized, setIsInitialized] = useState(false);
-
-    const isRun = useRef(false);
 
     useEffect(() => {
+        // 1. Protection React Strict Mode (Double mount)
         if (isRun.current) return;
         isRun.current = true;
-
-        // Check if already initialized (Hot Reload fix)
-        if (keycloakInstance.authenticated !== undefined) {
-            setIsAuthenticated(keycloakInstance.authenticated);
-            if (keycloakInstance.authenticated && keycloakInstance.tokenParsed) {
-                const tokenRoles = keycloakInstance.tokenParsed.realm_access?.roles as UserRole[] || [];
-                setRoles(tokenRoles);
-            }
-            setIsInitialized(true);
-            return;
-        }
 
         keycloakInstance
             .init({
                 onLoad: 'check-sso',
                 checkLoginIframe: false,
-                pkceMethod: 'S256',
+                pkceMethod: 'S256'
             })
             .then((authenticated: boolean) => {
-                setIsAuthenticated(authenticated);
-                if (authenticated && keycloakInstance.tokenParsed) {
-                    const tokenRoles = keycloakInstance.tokenParsed.realm_access?.roles as UserRole[] || [];
-                    setRoles(tokenRoles);
-                }
-                setIsInitialized(true);
+                // Cas nominal : Succès
+                handleAuthSuccess(authenticated);
             })
-            .catch((err: any) => {
-                console.error("Keycloak init failed", err);
-                setIsInitialized(true); // Stop loading even if it fails
+            .catch((err:any) => {
+                // 2. Protection HMR (Hot Module Replacement)
+                // Si Keycloak dit "déjà initialisé", on considère que c'est un SUCCÈS
+                const errorStr = JSON.stringify(err);
+                if (errorStr.includes("initialized once") || (err?.message && err.message.includes("initialized once"))) {
+                    console.warn("Keycloak déjà initialisé (rechargement détecté), récupération de l'état...");
+                    // On force le succès car l'instance est déjà prête
+                    handleAuthSuccess(keycloakInstance.authenticated || false);
+                } else {
+                    // Vraie erreur
+                    console.error("Erreur critique Keycloak:", err);
+                    setInitialized(true);
+                }
             });
+
+        // Fonction helper pour éviter de dupliquer le code dans le then et le catch
+        function handleAuthSuccess(authenticated: boolean) {
+            setIsAuthenticated(authenticated);
+            if (authenticated && keycloakInstance.tokenParsed) {
+                setRoles((keycloakInstance.tokenParsed.realm_access?.roles as UserRole[]) || []);
+            }
+            setInitialized(true);
+        }
+
     }, []);
-
-    const login = () => keycloakInstance.login().catch(console.error);
-    const logout = () => keycloakInstance.logout({ redirectUri: window.location.origin });
-
-    // 🛑 BLOCKING UI: Do not render children until Keycloak is ready
+    // BLOCKING UI: This is required to stop the "undefined login" crash
     if (!isInitialized) {
-        return (
-            <div className="flex items-center justify-center h-screen bg-gray-50">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600 font-semibold">Connecting to Security Server...</p>
-                </div>
-            </div>
-        );
+        return <div className="h-screen flex items-center justify-center text-blue-600">Loading...</div>;
     }
 
     return (
-        <AuthContext.Provider value={{
-            isAuthenticated,
-            token: keycloakInstance.token,
-            roles,
-            login,
-            logout,
-            username: keycloakInstance.tokenParsed?.preferred_username
-        }}>
+        <AuthContext.Provider
+            value={{
+                isAuthenticated,
+                token: keycloakInstance.token,
+                roles,
+                login: () => keycloakInstance.login(),
+                logout: () => keycloakInstance.logout({ redirectUri: window.location.origin }),
+                username: keycloakInstance.tokenParsed?.preferred_username,
+            }}
+        >
             {children}
         </AuthContext.Provider>
     );
@@ -86,6 +82,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 export const useAuth = () => {
     const context = useContext(AuthContext);
-    if (context === undefined) throw new Error('useAuth must be used within an AuthProvider');
+    if (!context) throw new Error('useAuth must be used within an AuthProvider');
     return context;
 };

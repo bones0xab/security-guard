@@ -14,7 +14,6 @@ const root = ReactDOM.createRoot(
 
 root.render(
   // StrictMode is off temporarily to prevent double Keycloak init in dev
-  // <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AuthProvider>
@@ -22,5 +21,4 @@ root.render(
         </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>
-  // </React.StrictMode>
 );
