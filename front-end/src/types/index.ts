@@ -8,12 +8,20 @@ export interface Product {
     quantity: number;
 }
 
-export interface Order {
+export interface OrderItem {
     id: number;
     productId: number;
     quantity: number;
-    status: 'PENDING' | 'COMPLETED' | 'CANCELLED';
-    createdAt: string;
+    price: number;
+}
+
+export interface Order {
+    id: number;
+    date_commande: string; // Date ISO venant de Java
+    statut: string; // CREATED, PENDING, DELIVERED, CANCELED
+    montant_total: number;
+    customerId: string;
+    orderItemsList: OrderItem[];
 }
 
 export interface User {

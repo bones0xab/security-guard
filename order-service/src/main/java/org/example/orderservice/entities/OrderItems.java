@@ -16,6 +16,7 @@ public class OrderItems {
     private Long id;
     private Long productId;
     private int quantity;
+    private double price;
     @ManyToOne
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) // Prevent infinite recursion in JSON
     private Order order;

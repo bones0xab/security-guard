@@ -20,6 +20,7 @@ public class Order {
     private Date date_commande;
     private String statut;
     private double montant_total;
+    private String customerId;
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItems> orderItemsList;
 
