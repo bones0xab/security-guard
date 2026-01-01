@@ -1,6 +1,6 @@
 version: '3.8'
 services:
-  # 1. Database Service (One container for both DBs to save resources)
+  # 1. Database
   postgres:
     image: postgres:15-alpine
     container_name: ms-postgres
@@ -8,18 +8,71 @@ services:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=admin
     ports:
-      - "5433:5432"
+      - "5433:5432" # On laisse Postgres tel quel (Standard)
     volumes:
-      # This script will create db_product and db_order automatically
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
-  # 2. Keycloak Authentication Server
+  # 2. Keycloak (FULL 9090)
   keycloak:
     image: quay.io/keycloak/keycloak:23.0.1
     container_name: ms-keycloak
     environment:
       - KEYCLOAK_ADMIN=admin
       - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KC_HOSTNAME_URL=http://localhost:9090
+      # MAGIE ICI : On dit à Keycloak d'écouter sur 9090 à l'intérieur
+      - KC_HTTP_PORT=9090
     command: start-dev
     ports:
-      - "9090:8080"
+      - "9090:9090" # Port Interne = Port Externe
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: ms-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+
+  # 3. Product Service (FULL 8081)
+  product-service:
+    build: ./produit-service
+    container_name: ms-product
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://ms-postgres:5432/db_product
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=admin
+    depends_on:
+      - postgres
+      - keycloak
+
+  # 4. Order Service (FULL 8082)
+  order-service:
+    build: ./order-service
+    container_name: ms-order
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://ms-postgres:5432/db_order
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=admin
+    depends_on:
+      - postgres
+      - keycloak
+
+  # 5. API Gateway (FULL 8080)
+  gateway-service:
+    build: ./gateway-service
+    container_name: ms-gateway
+    ports:
+      - "8080:8080" # Port Interne = Port Externe
+    environment:
+      # ATTENTION : Il faut changer server.port dans le fichier properties aussi !
+      - SERVER_PORT=8080
+    depends_on:
+      - keycloak
+      - product-service
+      - order-service

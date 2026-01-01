@@ -11,6 +11,4 @@ public interface ProductRestClients {
     @GetMapping("/api/products/{id}")
     ProductDTO findProductById(@PathVariable("id") Long id);
 
-    // Note: You need to create a simple class 'ProductDTO' in a 'model' package
-    // with fields: Long id, String name, double price, int quantity.
 }

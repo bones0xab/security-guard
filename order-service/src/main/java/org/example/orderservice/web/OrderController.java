@@ -1,5 +1,6 @@
 package org.example.orderservice.web;
 
+import lombok.extern.slf4j.Slf4j;
 import org.example.orderservice.entities.Order;
 import org.example.orderservice.service.OrderService;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
@@ -20,7 +22,7 @@ public class OrderController {
 
     // 1. CREATE (CLIENT)
     @PostMapping
-    @PreAuthorize("hasRole('CLIENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENT')")
     public Order createOrder(@RequestBody Order order, Authentication auth) {
         String customerId = getTokenClaim(auth, "preferred_username");
         return orderService.createOrder(order, customerId);
@@ -28,7 +30,7 @@ public class OrderController {
 
     // 2. READ ALL (ADMIN)
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENT')")
     public List<Order> getAllOrders() {
         return orderService.getAllOrders();
     }
@@ -38,7 +40,7 @@ public class OrderController {
     @PreAuthorize("hasRole('CLIENT')")
     public List<Order> getMyOrders(Authentication auth) {
         String customerId = getTokenClaim(auth, "preferred_username");
-        return orderService.getMyOrders(customerId);
+        return orderService.getMyOrder(customerId);
     }
 
     // 4. READ ONE (ADMIN OR CLIENT)
@@ -49,15 +51,16 @@ public class OrderController {
     }
 
     // 5. UPDATE STATUS (ADMIN)
-    @PutMapping("/{id}/status")
-    @PreAuthorize("hasRole('ADMIN')")
-    public Order updateStatus(@PathVariable Long id, @RequestParam String status) {
-        return orderService.updateOrderStatus(id, status);
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENT')")
+    public Order updateStatus(@PathVariable Long id, @RequestBody Order order) {
+        log.info("Updating order ID: {} with : {}", id, order.getStatut());
+        return orderService.updateOrder(id, order);
     }
 
     // 6. DELETE (ADMIN)
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENT')")
     public void deleteOrder(@PathVariable Long id) {
         orderService.deleteOrder(id);
     }

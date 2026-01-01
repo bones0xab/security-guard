@@ -16,6 +16,7 @@ import java.util.List;
 
 public class Order {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long orderId;
     private Date date_commande;
     private String statut;

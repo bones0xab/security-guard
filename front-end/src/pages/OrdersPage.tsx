@@ -1,34 +1,38 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosInstance } from '../api/axios';
-import { Loader2, Plus, Edit, Trash2, X, Save, ShoppingCart, Package } from 'lucide-react';
+import { Loader2, Plus, Edit, Trash2, X, Save, ShoppingCart } from 'lucide-react';
+import { useAuth } from '../auth/AuthProvider';
 
-// --- TYPES ---
+// --- TYPES (Matched to your Backend) ---
+
 interface Product {
     id: number;
     name: string;
     price: number;
-    // Add other fields if needed
 }
 
 interface OrderItem {
+    id?: number;        // Backend OrderItems has "id"
     productId: number;
     quantity: number;
     price: number;
-    productName?: string; // Optional helper for display
 }
 
 interface Order {
-    id?: number;
-    customerId: number;
+    orderId?: number;       // CHANGED: Matches Java "private long orderId"
+    customerId: string;     // CHANGED: Matches Java "private String customerId"
     statut: string;
     montant_total: number;
+    date_commande?: string; // Matches Java "private Date date_commande"
     orderItemsList: OrderItem[];
 }
 
 // --- MAIN PAGE COMPONENT ---
 const OrdersPage = () => {
     const queryClient = useQueryClient();
+    const { roles } = useAuth(); // <--- 1. Get User Roles
+    const isAdmin = roles.includes('ADMIN');
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingOrder, setEditingOrder] = useState<Order | null>(null);
@@ -37,12 +41,14 @@ const OrdersPage = () => {
     const { data: orders, isLoading: ordersLoading } = useQuery({
         queryKey: ['orders'],
         queryFn: async () => {
-            const res = await axiosInstance.get<Order[]>('/orders');
+            // <--- 3. Logic: Admin sees ALL ('/orders'), Client sees THEIRS ('/orders/my-orders')
+            const endpoint = isAdmin ? '/orders' : '/orders/my-orders';
+            const res = await axiosInstance.get<Order[]>(endpoint);
             return res.data;
         }
     });
 
-    // 2. FETCH PRODUCTS (To show in the dropdown)
+    // 2. FETCH PRODUCTS
     const { data: products } = useQuery({
         queryKey: ['products'],
         queryFn: async () => {
@@ -51,11 +57,12 @@ const OrdersPage = () => {
         }
     });
 
-    // 3. SAVE ORDER (Create or Update)
+    // 3. SAVE ORDER
     const saveMutation = useMutation({
         mutationFn: async (order: Order) => {
-            if (order.id) {
-                return await axiosInstance.put(`/orders/${order.id}`, order);
+            // Check for orderId (not id)
+            if (order.orderId) {
+                return await axiosInstance.put(`/orders/${order.orderId}`, order);
             } else {
                 return await axiosInstance.post('/orders', order);
             }
@@ -70,6 +77,8 @@ const OrdersPage = () => {
     // 4. DELETE ORDER
     const deleteMutation = useMutation({
         mutationFn: async (id: number) => {
+            // Backend expects ID in URL
+            console.log("THis the ID : ", id);
             await axiosInstance.delete(`/orders/${id}`);
         },
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ['orders'] })
@@ -112,7 +121,8 @@ const OrdersPage = () => {
                 <table className="w-full text-left">
                     <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
-                        <th className="p-4 font-semibold text-gray-600">ID</th>
+                        <th className="p-4 font-semibold text-gray-600">Order ID</th>
+                        <th className="p-4 font-semibold text-gray-600">Date</th>
                         <th className="p-4 font-semibold text-gray-600">Customer</th>
                         <th className="p-4 font-semibold text-gray-600">Status</th>
                         <th className="p-4 font-semibold text-gray-600">Total</th>
@@ -121,8 +131,12 @@ const OrdersPage = () => {
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                     {orders?.map((order) => (
-                        <tr key={order.id} className="hover:bg-gray-50">
-                            <td className="p-4 font-medium">#{order.id}</td>
+                        // USE order.orderId HERE
+                        <tr key={order.orderId || Math.random()} className="hover:bg-gray-50">
+                            <td className="p-4 font-medium">#{order.orderId}</td>
+                            <td className="p-4 text-sm text-gray-500">
+                                {order.date_commande ? new Date(order.date_commande).toLocaleDateString() : '-'}
+                            </td>
                             <td className="p-4">{order.customerId}</td>
                             <td className="p-4">
                                     <span className={`px-2 py-1 rounded-full text-xs font-bold 
@@ -135,7 +149,8 @@ const OrdersPage = () => {
                                 <button onClick={() => openEditModal(order)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg">
                                     <Edit size={18} />
                                 </button>
-                                <button onClick={() => deleteMutation.mutate(order.id!)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg">
+                                {/* USE order.orderId HERE */}
+                                <button onClick={() => deleteMutation.mutate(order.orderId!)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg">
                                     <Trash2 size={18} />
                                 </button>
                             </td>
@@ -145,7 +160,6 @@ const OrdersPage = () => {
                 </table>
             </div>
 
-            {/* Pass products to the modal */}
             {isModalOpen && (
                 <OrderFormModal
                     initialData={editingOrder}
@@ -158,29 +172,24 @@ const OrdersPage = () => {
     );
 };
 
-// --- MODAL COMPONENT (With Product Selection) ---
+// --- MODAL COMPONENT ---
+// --- MODAL COMPONENT (Corrected: No Customer ID Input) ---
 const OrderFormModal = ({ initialData, availableProducts, onClose, onSave }: {
     initialData: Order | null,
     availableProducts: Product[],
     onClose: () => void,
     onSave: (order: Order) => void
 }) => {
-    const [customerId, setCustomerId] = useState(initialData?.customerId || 0);
+    // We don't need a state for customerId anymore, the backend handles it.
     const [statut, setStatut] = useState(initialData?.statut || 'CREATED');
     const [items, setItems] = useState<OrderItem[]>(initialData?.orderItemsList || []);
 
-    // Add empty item
     const addItem = () => setItems([...items, { productId: 0, quantity: 1, price: 0 }]);
-
-    // Remove item
     const removeItem = (index: number) => setItems(items.filter((_, i) => i !== index));
 
-    // Handle Product Selection
     const handleProductChange = (index: number, productId: number) => {
         const product = availableProducts.find(p => p.id === productId);
         const newItems = [...items];
-
-        // Auto-fill price when product is selected
         newItems[index] = {
             ...newItems[index],
             productId: productId,
@@ -200,8 +209,10 @@ const OrderFormModal = ({ initialData, availableProducts, onClose, onSave }: {
         const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
         onSave({
-            id: initialData?.id,
-            customerId,
+            orderId: initialData?.orderId,
+            // We send an empty string or the existing one.
+            // The Backend will overwrite this with the Token ID anyway for new orders.
+            customerId: initialData?.customerId || '',
             statut,
             montant_total: total,
             orderItemsList: items
@@ -217,14 +228,22 @@ const OrderFormModal = ({ initialData, availableProducts, onClose, onSave }: {
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
-                    {/* Customer & Status */}
+                    {/* Status Field */}
                     <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Customer ID</label>
-                            <input type="number" className="w-full border rounded-lg p-2"
-                                   value={customerId} onChange={e => setCustomerId(Number(e.target.value))} required />
-                        </div>
-                        <div>
+                        {/* Only show Customer ID if we are EDITING (Read Only) */}
+                        {initialData && (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Customer</label>
+                                <input
+                                    type="text"
+                                    disabled
+                                    value={initialData.customerId}
+                                    className="w-full border rounded-lg p-2 bg-gray-100 text-gray-500"
+                                />
+                            </div>
+                        )}
+
+                        <div className={initialData ? "" : "col-span-2"}>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                             <select className="w-full border rounded-lg p-2 bg-white"
                                     value={statut} onChange={e => setStatut(e.target.value)}>
@@ -248,7 +267,6 @@ const OrderFormModal = ({ initialData, availableProducts, onClose, onSave }: {
                         <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2">
                             {items.map((item, index) => (
                                 <div key={index} className="flex gap-3 items-end bg-white p-2 rounded shadow-sm border">
-                                    {/* Product Selector */}
                                     <div className="flex-[2]">
                                         <p className="text-xs text-gray-500 mb-1">Product</p>
                                         <select
@@ -265,8 +283,6 @@ const OrderFormModal = ({ initialData, availableProducts, onClose, onSave }: {
                                             ))}
                                         </select>
                                     </div>
-
-                                    {/* Quantity */}
                                     <div className="w-20">
                                         <p className="text-xs text-gray-500 mb-1">Qty</p>
                                         <input type="number" min="1" className="w-full border rounded p-2 text-sm"
@@ -274,26 +290,20 @@ const OrderFormModal = ({ initialData, availableProducts, onClose, onSave }: {
                                                onChange={(e) => handleQuantityChange(index, Number(e.target.value))}
                                         />
                                     </div>
-
-                                    {/* Price Read-only */}
                                     <div className="w-24">
                                         <p className="text-xs text-gray-500 mb-1">Subtotal</p>
                                         <div className="p-2 text-sm font-bold text-gray-700 bg-gray-100 rounded text-right">
                                             {(item.price * item.quantity).toFixed(2)}€
                                         </div>
                                     </div>
-
                                     <button type="button" onClick={() => removeItem(index)} className="text-red-400 hover:text-red-600 p-2">
                                         <Trash2 size={18} />
                                     </button>
                                 </div>
                             ))}
-                            {items.length === 0 && <p className="text-sm text-gray-400 text-center py-4">No items yet.</p>}
                         </div>
-
-                        {/* Grand Total */}
                         <div className="mt-4 text-right">
-                            <span className="text-gray-600 mr-2">Total Estimate:</span>
+                            <span className="text-gray-600 mr-2">Total:</span>
                             <span className="text-xl font-bold text-blue-600">
                                 {items.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2)} €
                             </span>

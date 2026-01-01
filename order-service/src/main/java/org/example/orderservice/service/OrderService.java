@@ -1,6 +1,7 @@
 package org.example.orderservice.service;
 
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.example.orderservice.Model.ProductDTO;
 import org.example.orderservice.entities.Order;
 import org.example.orderservice.entities.OrderItems;
@@ -12,6 +13,7 @@ import java.util.Date;
 import java.util.List;
 
 @Service
+@Slf4j
 @Transactional
 public class OrderService {
     private final OrderRepository orderRepository;
@@ -59,14 +61,42 @@ public class OrderService {
     }
 
     // --- UPDATE (Statut uniquement) ---
-    public Order updateOrderStatus(Long id, String newStatus) {
+    public Order updateOrder(Long id, Order updatedOrder) {
         Order order = getOrderById(id);
-        order.setStatut(newStatus);
+
+        // 1. Update simple fields
+        order.setStatut(updatedOrder.getStatut());
+        order.setMontant_total(updatedOrder.getMontant_total());
+        order.setCustomerId(updatedOrder.getCustomerId());
+        // Don't update date_commande usually, keep the original creation date
+
+        // 2. CRITICAL: Handle the Items List Relation
+        // If we just do setOrderItemsList, the new items won't know their parent ID.
+        if (updatedOrder.getOrderItemsList() != null) {
+            List<OrderItems> newItems = updatedOrder.getOrderItemsList();
+
+            // Loop through and re-attach the parent Order
+            for (OrderItems item : newItems) {
+                item.setOrder(order); // <--- MANDATORY FOR JPA
+            }
+
+            // Now it's safe to replace the list
+            // (Assuming you have orphanRemoval=true in Entity, this deletes old items removed from the list)
+            order.getOrderItemsList().clear();
+            order.getOrderItemsList().addAll(newItems);
+        }
+
+        log.info("Order ID: {} updated successfully", id);
         return orderRepository.save(order);
     }
 
     // --- DELETE ---
     public void deleteOrder(Long id) {
         orderRepository.deleteById(id);
+        log.info("Order Deleted Successfully");
+    }
+
+    public List<Order> getMyOrder(String customerId) {
+        return orderRepository.findByCustomerId(customerId);
     }
 }
