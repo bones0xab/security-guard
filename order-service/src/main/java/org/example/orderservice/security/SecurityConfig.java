@@ -44,8 +44,10 @@ public class SecurityConfig {
 
     @Bean
     public JwtDecoder jwtDecoder() {
-        // URL de votre realm Keycloak
-        String jwkSetUri = "http://localhost:9090/realms/mini-project/protocol/openid-connect/certs";
+        // CHANGE TO: Use ms-keycloak (container can reach this)
+        String jwkSetUri = "http://ms-keycloak:9090/realms/mini-project/protocol/openid-connect/certs";
+
+        System.out.println("Product Service JWT Decoder using: " + jwkSetUri);
 
         return NimbusJwtDecoder
                 .withJwkSetUri(jwkSetUri)

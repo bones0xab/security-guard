@@ -9,20 +9,29 @@ export const axiosInstance = axios.create({
 });
 
 // Request Interceptor
+// In your axios interceptor or API call file
 axiosInstance.interceptors.request.use(async (config) => {
-    // Only try to add token if Keycloak is actually ready and authenticated
+    console.log("=== DEBUG FRONTEND TOKEN ===");
+    console.log("Keycloak authenticated:", keycloak.authenticated);
+    console.log("Keycloak token exists:", !!keycloak.token);
+    console.log("Keycloak token (first 50 chars):", keycloak.token ? keycloak.token.substring(0, 50) + "..." : "NO TOKEN");
+    console.log("===========================");
+
     if (keycloak.authenticated && keycloak.token) {
         try {
             await keycloak.updateToken(30);
             config.headers.Authorization = `Bearer ${keycloak.token}`;
+            console.log("Authorization header set");
         } catch (error) {
-            console.error("Token refresh failed");
+            console.error("Token refresh failed:", error);
             keycloak.login();
         }
+    } else {
+        console.error("NO TOKEN AVAILABLE - User not authenticated");
     }
+
     return config;
 });
-
 // Response Interceptor
 axiosInstance.interceptors.response.use(
     (response) => response,

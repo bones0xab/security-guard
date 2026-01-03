@@ -7,24 +7,30 @@ services:
     environment:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=admin
+      - POSTGRES_MULTIPLE_DATABASES=db_product,db_order
     ports:
-      - "5433:5432" # On laisse Postgres tel quel (Standard)
+      - "5433:5432"
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
-  # 2. Keycloak (FULL 9090)
+  # 2. Keycloak (CRITICAL FIX - Use HOST IP)
   keycloak:
     image: quay.io/keycloak/keycloak:23.0.1
     container_name: ms-keycloak
     environment:
       - KEYCLOAK_ADMIN=admin
       - KEYCLOAK_ADMIN_PASSWORD=admin
-      - KC_HOSTNAME_URL=http://localhost:9090
-      # MAGIE ICI : On dit à Keycloak d'écouter sur 9090 à l'intérieur
       - KC_HTTP_PORT=9090
+      - KC_HOSTNAME_STRICT=false
+      - KC_HOSTNAME_STRICT_HTTPS=false
+      - KC_PROXY=edge
+      - KC_HOSTNAME_URL=http://localhost:9090
+      - KC_HOSTNAME_ADMIN_URL=http://localhost:9090
     command: start-dev
     ports:
-      - "9090:9090" # Port Interne = Port Externe
+      - "9090:9090"
+#    extra_hosts:
+#      - "host.docker.internal:host-gateway"
 
   pgadmin:
     image: dpage/pgadmin4
@@ -35,7 +41,7 @@ services:
     ports:
       - "5050:80"
 
-  # 3. Product Service (FULL 8081)
+  # 3. Product Service
   product-service:
     build: ./produit-service
     container_name: ms-product
@@ -48,8 +54,10 @@ services:
     depends_on:
       - postgres
       - keycloak
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
-  # 4. Order Service (FULL 8082)
+  # 4. Order Service
   order-service:
     build: ./order-service
     container_name: ms-order
@@ -62,17 +70,22 @@ services:
     depends_on:
       - postgres
       - keycloak
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
-  # 5. API Gateway (FULL 8080)
+  # 5. API Gateway
   gateway-service:
     build: ./gateway-service
     container_name: ms-gateway
     ports:
-      - "8080:8080" # Port Interne = Port Externe
+      - "8080:8080"
     environment:
-      # ATTENTION : Il faut changer server.port dans le fichier properties aussi !
       - SERVER_PORT=8080
+      # Keycloak URLs for GATEWAY (must use internal Docker network name)
+      - KEYCLOAK_URL=http://ms-keycloak:9090
     depends_on:
       - keycloak
       - product-service
       - order-service
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
