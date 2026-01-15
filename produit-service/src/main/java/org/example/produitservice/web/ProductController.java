@@ -51,4 +51,10 @@ public class ProductController {
     public Product getProductById(@PathVariable Long id) {
         return productService.getProductById(id);
     }
+
+//    @PostMapping("/ai")
+//    @PreAuthorize("hasAnyRole('ADMIN','CLIENT')")
+//    public String responseAiDataBase(@RequestBody String prompt) {
+//        return productService.responseAiDataBase(prompt);
+//    }
 }

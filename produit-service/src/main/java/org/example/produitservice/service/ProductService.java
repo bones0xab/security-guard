@@ -6,6 +6,7 @@ import jakarta.websocket.server.ServerEndpoint;
 import lombok.Setter;
 import org.example.produitservice.entitie.Product;
 import org.example.produitservice.repository.ProductRepository;
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

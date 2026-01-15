@@ -2,12 +2,15 @@ package org.example.orderservice.web;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.orderservice.entities.Order;
+import org.example.orderservice.entities.Refund;
 import org.example.orderservice.service.OrderService;
+import org.example.orderservice.service.RefundService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Ref;
 import java.util.List;
 
 @Slf4j
@@ -15,9 +18,11 @@ import java.util.List;
 @RequestMapping("/api/orders")
 public class OrderController {
     private final OrderService orderService;
+    private final RefundService refundService;
 
-    public OrderController(OrderService orderService) {
+    public OrderController(OrderService orderService, RefundService refundService) {
         this.orderService = orderService;
+        this.refundService = refundService;
     }
 
     // 1. CREATE (CLIENT)
@@ -65,6 +70,19 @@ public class OrderController {
         orderService.deleteOrder(id);
     }
 
+    @PostMapping("/refund")
+    @PreAuthorize("hasRole('CLIENT')")
+    public Refund refund(@RequestBody Refund refund) {
+        log.info("Processing refund for order ID: {}", refund.getOrderId());
+        return refundService.createRefund(refund);
+    }
+
+    @GetMapping("/refunds")
+    @PreAuthorize("hasAnyRole('ADMIN','CLIET')")
+    public List<Refund> getAllRefunds() {
+        log.info("Fetching all refunds");
+        return refundService.getAll();
+    }
     // Helper method
     private String getTokenClaim(Authentication auth, String claim) {
         return ((JwtAuthenticationToken) auth).getToken().getClaimAsString(claim);

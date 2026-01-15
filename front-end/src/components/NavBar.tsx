@@ -24,6 +24,12 @@ const NavBar = () => {
                     </Link>
                 )}
 
+                {isAuthenticated && (
+                    <Link to="/refund" className="hover:text-blue-600 font-medium flex items-center gap-1">
+                        <Package size={18} /> Refund
+                    </Link>
+                )}
+
                 {isAdmin && (
                     <Link to="/admin" className="text-red-600 hover:text-red-800 font-medium flex items-center gap-1">
                         <Settings size={18} /> Admin

@@ -30,3 +30,11 @@ export interface User {
     email: string;
     roles: UserRole[];
 }
+
+export interface Refund{
+    orderId: number;
+    clientId: number;
+    reason: string;
+    amount: number;
+}
+
