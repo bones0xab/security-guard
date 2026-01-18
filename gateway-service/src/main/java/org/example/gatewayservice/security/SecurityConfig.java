@@ -39,7 +39,6 @@ public class SecurityConfig {
         config.setAllowedHeaders(List.of("*")); // Autoriser tous les headers (Authorization inclus)
         config.setAllowCredentials(true);
 
-        // <--- 4. UrlBasedCorsConfigurationSource du package "reactive"
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
