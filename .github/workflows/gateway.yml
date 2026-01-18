@@ -33,14 +33,14 @@
         - name : docker metadata
           uses: docker/metadata-action@v4
           with:
-            images: ${{vars.DOCKER_USERNAME }}/ms-gateway
+            images: ${{secrets.DOCKER_USERNAME }}/ms-gateway
 
 
         - name : Login to docker hub
           uses: docker/login-action@v2
           with:
-            username: ${{vars.DOCKER_USERNAME}}
-            password: ${{vars.DOCKER_PASSWORD}}
+            username: ${{secrets.DOCKER_USERNAME}}
+            password: ${{secrets.DOCKER_PASSWORD}}
 
 
         - name: Set up Docker Buildx
