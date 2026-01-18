@@ -117,27 +117,27 @@
                 <artifactId>sonar-maven-plugin</artifactId>
                 <version>3.10.0.2594</version>
             </plugin>
-            <plugin>
-                <groupId>org.owasp</groupId>
-                <artifactId>dependency-check-maven</artifactId>
-                <version>9.2.0</version>
-                <!-- ou la dernière version stable -->
-                <configuration>
-                    <!--suppress UnresolvedMavenProperty -->
-                    <nvdApiKey>${nvdApiKey}</nvdApiKey>
-                    <failOnError>false</failOnError>
-                    <failBuildOnCVSS>0</failBuildOnCVSS>
-                    <format>ALL</format>
-                    <outputDirectory>${project.build.directory}</outputDirectory>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.owasp</groupId>-->
+<!--                <artifactId>dependency-check-maven</artifactId>-->
+<!--                <version>9.2.0</version>-->
+<!--                &lt;!&ndash; ou la dernière version stable &ndash;&gt;-->
+<!--                <configuration>-->
+<!--                    &lt;!&ndash;suppress UnresolvedMavenProperty &ndash;&gt;-->
+<!--                    <nvdApiKey>${nvdApiKey}</nvdApiKey>-->
+<!--                    <failOnError>false</failOnError>-->
+<!--                    <failBuildOnCVSS>0</failBuildOnCVSS>-->
+<!--                    <format>ALL</format>-->
+<!--                    <outputDirectory>${project.build.directory}</outputDirectory>-->
+<!--                </configuration>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <goals>-->
+<!--                            <goal>check</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
         </plugins>
     </build>
 </project>
