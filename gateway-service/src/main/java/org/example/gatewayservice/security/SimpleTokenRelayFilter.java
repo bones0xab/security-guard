@@ -9,7 +9,7 @@ import reactor.core.publisher.Mono;
 
 @Component
 public class SimpleTokenRelayFilter implements GlobalFilter {
-
+//tet
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String authHeader = exchange.getRequest().getHeaders().getFirst("Authorization");
