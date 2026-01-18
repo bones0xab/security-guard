@@ -30,7 +30,6 @@ public class SecurityConfig {
 
         return http.build();
     }
-    //concentrited on CORS Reactive
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
