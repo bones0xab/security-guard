@@ -13,7 +13,7 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import java.util.List;
 
 @Configuration
-@EnableWebFluxSecurity // <--- 1. Changement important : Flux Security
+@EnableWebFluxSecurity
 public class SecurityConfig {
 
     @Bean
