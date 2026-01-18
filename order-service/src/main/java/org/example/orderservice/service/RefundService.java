@@ -30,6 +30,21 @@ public class RefundService {
         return refundRepository.findAll();
     }
 
+    public Refund update(Long id, Refund refund)
+    {
+        log.info("Updating refund for order ID: {}", id);
+        Refund existingRefund = refundRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Refund not found with id: " + id));
+        existingRefund.setStatus(refund.getStatus());
+        return refundRepository.save(existingRefund);
+    }
+
+
+    public void delete(Long id) {
+        log.info("Deleting refund for order ID: {}", id);
+        refundRepository.deleteById(id);
+    }
+
 
 
 

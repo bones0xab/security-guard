@@ -9,6 +9,7 @@ import AdminPage from './pages/AdminPage';
 import UnauthorizedPage from './pages/UnauthorizedPage';
 import OrdersPage from "./pages/OrdersPage";
 import RefundPage from "./pages/RefundPage";
+import AiChatPage from "./pages/AiChatPage";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ function App() {
                             <Route path="/unauthorized" element={<UnauthorizedPage />} />
                             <Route path="/orders" element={<OrdersPage />} />
                             <Route path="/refund" element={<RefundPage/>} />
+                            <Route path="/ai" element={<AiChatPage/>} />
 
                             {/* Protected Route: Needs Login only */}
                             <Route element={<PrivateRoute />}>

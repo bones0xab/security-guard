@@ -2,12 +2,12 @@ version: '3.8'
 services:
   # 1. Database
   postgres:
-    image: postgres:15-alpine
+    image: pgvector/pgvector:pg15
     container_name: ms-postgres
     environment:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=admin
-      - POSTGRES_MULTIPLE_DATABASES=db_product,db_order
+      - POSTGRES_MULTIPLE_DATABASES=db_product,db_order,db_ai,db_refund
     ports:
       - "5433:5432"
     volumes:
@@ -114,6 +114,30 @@ services:
       POSTGRES_DB: sonar
     volumes:
       - sonardb_data:/var/lib/postgresql/data
+
+  ai-service:
+    build: ./AI-service
+    container_name: ms-ai-service
+    ports:
+      - "1337:1337"
+    environment:
+      - SERVER_PORT=1337
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+#  front-end:
+#    build: ./front-end
+#    container_name: front-service
+#    ports:
+#      - 3000:3000
+#    environment:
+#        - REACT_APP_API_GATEWAY_URL=http://localhost:8080
+#        - REACT_APP_AI_SERVICE_URL=http://localhost:1337
+#        - VITE_KEYCLOAK_URL=http://localhost:9090
+#    stdin_open: true
+#    tty: true
+#    extra_hosts:
+#        - "host.docker.internal:host-gateway"
 
 volumes:
   sonarqube_data:

@@ -1,3 +1,4 @@
 CREATE DATABASE db_product;
 CREATE DATABASE db_order;
 CREATE DATABASE db_refund;
+CREATE DATABASE db_ai;

@@ -78,11 +78,26 @@ public class OrderController {
     }
 
     @GetMapping("/refunds")
-    @PreAuthorize("hasAnyRole('ADMIN','CLIET')")
+    @PreAuthorize("hasAnyRole('ADMIN','CLIENT')")
     public List<Refund> getAllRefunds() {
         log.info("Fetching all refunds");
         return refundService.getAll();
     }
+
+    @PutMapping("/refund/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public Refund updateRefund(@PathVariable Long id, @RequestBody Refund refund) {
+        log.info("Processing refund for order ID: {}", refund.getOrderId());
+        return refundService.update(id, refund);
+    }
+
+    @DeleteMapping("/refund/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public void deleteRefund(@PathVariable Long id) {
+        log.info("Deleting refund with ID: {}", id);
+        refundService.delete(id);
+    }
+
     // Helper method
     private String getTokenClaim(Authentication auth, String claim) {
         return ((JwtAuthenticationToken) auth).getToken().getClaimAsString(claim);

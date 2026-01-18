@@ -32,9 +32,17 @@ export interface User {
 }
 
 export interface Refund{
+    id:number;
     orderId: number;
     clientId: number;
     reason: string;
-    amount: number;
+    status: Status;
 }
+
+
+export enum Status {
+    PENDING = 'PENDING',
+    APPROVED = 'APPROVED',
+    REJECTED = 'REJECTED',
+    COMPLETED = 'COMPLETED'}
 

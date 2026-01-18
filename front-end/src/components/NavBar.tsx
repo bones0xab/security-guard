@@ -26,7 +26,13 @@ const NavBar = () => {
 
                 {isAuthenticated && (
                     <Link to="/refund" className="hover:text-blue-600 font-medium flex items-center gap-1">
-                        <Package size={18} /> Refund
+                        <Package size={18} /> refunds
+                    </Link>
+                )}
+
+                {isAuthenticated && (
+                    <Link to="/ai" className="hover:text-blue-600 font-medium flex items-center gap-1">
+                        <Package size={18} /> Ai
                     </Link>
                 )}
 
