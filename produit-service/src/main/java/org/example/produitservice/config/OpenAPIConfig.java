@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class OpenAPIConfig {
-//TBE
+//TBEe
 
     @Bean
     public OpenAPI customOpenAPI() {
