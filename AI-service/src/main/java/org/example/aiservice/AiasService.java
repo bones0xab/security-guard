@@ -51,8 +51,9 @@ public class AiasService {
 
             List<OrderDTO> orders = orderClientsFeign.getAllOrders();
             for (OrderDTO o : orders) {
+                int itemCount = o.getItems() != null ? o.getItems().size() : 0;
                 Document doc = new Document(
-                        "Commande #" + o.getOrderId() + ": " + o.getItems().size() + " articles, total €" + o.getTotalAmount(),
+                        "Commande #" + o.getOrderId() + ": " + itemCount + " articles, total €" + o.getTotalAmount(),
                         Map.of("domain", "order", "orderId", o.getOrderId())
                 );
                 docs.add(doc);
