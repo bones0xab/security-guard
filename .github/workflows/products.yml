@@ -21,6 +21,15 @@ jobs:
             java-version: '17'
             distribution: 'temurin'
 
+
+        - name: Cache maven packages
+          uses: actions/cache@v3
+          with:
+            path: ~/.m2/repository
+            key: ${{ runner.os }}--m2-${{ hashFiles('**/pom.xml') }}
+            restore-keys: |
+                ${{ runner.os }}-m2-
+
         - name: Build with Maven
           run: mvn -f produit-service/pom.xml clean install
 
@@ -59,5 +68,7 @@ jobs:
             push: true
             tags: ${{ steps.meta.outputs.tags }}
             labels: ${{ steps.meta.outputs.labels }}
+            cache-from: type=gha
+            cache-to: type=gha,mode=max
             provenance: true
             sbom: true
