@@ -7,7 +7,6 @@ import org.example.orderservice.entities.Order;
 import org.example.orderservice.entities.OrderItems;
 import org.example.orderservice.feign.ProductRestClients;
 import org.example.orderservice.repo.OrderRepository;
-import org.example.orderservice.repo.RefundRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -17,6 +16,7 @@ import java.util.List;
 @Slf4j
 @Transactional
 public class OrderService {
+
     private final OrderRepository orderRepository;
     private final ProductRestClients productRestClient;
 
@@ -87,15 +87,18 @@ public class OrderService {
             order.getOrderItemsList().addAll(newItems);
         }
 
+
         log.info("Order ID: {} updated successfully", id);
         return orderRepository.save(order);
     }
+
 
     // --- DELETE ---
     public void deleteOrder(Long id) {
         orderRepository.deleteById(id);
         log.info("Order Deleted Successfully");
     }
+
 
     public List<Order> getMyOrder(String customerId) {
         return orderRepository.findByCustomerId(customerId);
