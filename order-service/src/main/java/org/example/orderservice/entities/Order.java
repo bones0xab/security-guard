@@ -13,8 +13,8 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
-
 public class Order {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long orderId;

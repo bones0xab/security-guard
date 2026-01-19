@@ -45,7 +45,7 @@ jobs:
         id : meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{secrets.DOCKER_USERNAME }}/ms-order:v1.0.0
+          images: ${{secrets.DOCKER_USERNAME }}/ms-order
           tags: |
                 type=ref,event=branch
                 type=ref,event=tag
