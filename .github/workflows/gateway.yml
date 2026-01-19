@@ -46,7 +46,7 @@
           id : meta
           uses: docker/metadata-action@v4
           with:
-            images: ${{secrets.DOCKER_USERNAME }}/ms-gateway
+            images: ${{secrets.DOCKER_USERNAME }}/ms-gateway:v1.0.0
             tags: |
               type=ref,event=branch
               type=ref,event=tag
