@@ -15,6 +15,5 @@ WORKDIR /app
 
 # On copie le .jar généré à l'étape 1 (build) vers l'étape 2
 COPY --from=build /app/target/*.jar app.jar
-
 # On lance l'application
 ENTRYPOINT ["java", "-jar", "app.jar"]
