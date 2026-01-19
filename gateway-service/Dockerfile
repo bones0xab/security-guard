@@ -2,7 +2,6 @@
 # On utilise une image qui contient déjà Maven et Java 17
 FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /app
-
 # On copie les fichiers du projet dans l'image
 COPY pom.xml .
 COPY src ./src
