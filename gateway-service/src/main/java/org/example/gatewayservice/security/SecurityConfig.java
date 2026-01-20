@@ -22,7 +22,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // <--- 2. CORS Reactive
                 .authorizeExchange(exchanges -> exchanges // <--- 3. authorizeExchange (pas HttpRequests)
-                        .pathMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                        .pathMatchers("/v3/api-docs/**", "/swagger-ui/**", "/actuator/**").permitAll()
                         .pathMatchers("/api/products/**").authenticated() // Exemple
                         .anyExchange().authenticated()
                 )
