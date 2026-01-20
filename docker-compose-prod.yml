@@ -90,12 +90,10 @@ services:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
     ports:
-      - "9095:9095"
+      - "9095:9090"
     restart: unless-stopped
     depends_on:
       - gateway-service
-
-
 
 
 volumes:
