@@ -5,6 +5,7 @@ import org.example.aiservice.model.OrderDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
@@ -14,5 +15,8 @@ public interface OrderClientsFeign {
 
     @GetMapping("/api/orders")
     List<OrderDTO> getAllOrders();
+
+    @GetMapping("/api/orders/{id}")
+    OrderDTO getOrderById(@PathVariable Long id);
 
 }

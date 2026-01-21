@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-service
+  labels:
+    app: postgres-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-service
+  template:
+    metadata:
+      name: postgres-service
+      labels:
+        app: postgres-service
+    spec:
+      containers:
+        - name: postgres-service
+          image: pgvector/pgvector:pg15
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+              protocol: TCP
+
+          env:
+            - name: POSTGRES_USER
+              value: "postgres"
+            - name: POSTGRES_PASSWORD
+              value: "postgres"
+          volumeMounts:
+            - mountPath:  /docker-entrypoint-initdb.d
+              name: init-sql
+      volumes:
+        - name: init-sql
+          configMap:
+                name: postgres-initiation
+
+      restartPolicy: Always
+      

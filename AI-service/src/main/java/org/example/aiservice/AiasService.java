@@ -8,6 +8,7 @@ import org.example.aiservice.model.ProductDTO;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.embedding.EmbeddingModel;
+import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Service;
 
@@ -43,10 +44,20 @@ public class AiasService {
         }
     }
 
+
+    @Tool(description = "Recuperation d'une order")
+    public String getOrderById(Long id) {
+        OrderDTO order = orderClientsFeign.getOrderById(id);
+        if (order == null) return "Aucune commande avec cet ID.";
+        int itemcount = order.getItems() != null ? order.getItems().size() : 0;
+
+        return "Commande #" + order.getOrderId() + ": " + itemcount + " articles, total €" + order.getTotalAmount();
+    }
+
     public void init() {
         // Wrap in try-catch to handle errors without crashing the chat
         try {
-            log.info("AI indexing started.");
+            log.info("AI indexing started. ");
             List<Document> docs = new ArrayList<>();
 
             List<OrderDTO> orders = orderClientsFeign.getAllOrders();
@@ -109,6 +120,7 @@ public class AiasService {
                     - Sois concis (3 phrases max).
                     """.formatted(context.isBlank() ? "Aucune donnée" : context))
                     .user(query)
+                    .tools(AiasService.class)
                     .call()
                     .content();
 

@@ -28,7 +28,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // Disable CSRF for microservices
                 .cors(cors -> cors.disable())                .authorizeHttpRequests(auth -> auth
                         // Publicly accessible endpoints (Swagger)
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/actuator/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/actuator/**", "/chat/**").permitAll()
                         // All other requests require authentication
                         .anyRequest().authenticated()
                 )
