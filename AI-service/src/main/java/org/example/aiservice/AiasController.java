@@ -1,5 +1,6 @@
 package org.example.aiservice;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,9 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class AiasController {
 
     private final AiasService aiasService;
+
     public AiasController(AiasService aiasService) {
         this.aiasService = aiasService;
     }
+
     @PostMapping("/sync-data")
     public ResponseEntity<String> syncData() {
         log.info("Manual data sync triggered.");
@@ -24,7 +27,7 @@ public class AiasController {
     }
 
     @PostMapping("/chat")
-    public ResponseEntity<String> chatWithAi(@RequestParam String querytext) {
+    public ResponseEntity<String> chatWithAi(@RequestParam String querytext, HttpServletRequest request) {
         log.info("Received chat request with query : {}", querytext);
         return ResponseEntity.ok(aiasService.ragQuery(querytext));
     }
