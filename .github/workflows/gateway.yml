@@ -25,6 +25,9 @@
           with:
               path: ~/.m2/repository
               key: ${{ runner.os }}--m2-${{ hashFiles('**/pom.xml') }}
+        - name: Build project  # New step: Compile to generate target/classes
+          run: mvn -f gateway-service/pom.xml clean compile -DskipTests
+
         - name: sonar scan
           uses: sonarsource/sonarcloud-github-action@master
           env:
