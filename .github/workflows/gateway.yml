@@ -25,9 +25,11 @@
           with:
               path : ~/.m2/repository
               key : ${{ runner.os }}--m2-${{ hashFiles('**/pom.xml') }}
+        - name: sonar scan
+          uses: sonarsource/sonarcloud-github-action@master
           env:
-            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-            SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+              SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+              SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
     build-and-test:
       runs-on: ubuntu-latest
@@ -96,3 +98,4 @@
               provenance: true
               sbom: true
 
+9
