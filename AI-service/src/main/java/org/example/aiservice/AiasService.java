@@ -8,7 +8,6 @@ import org.example.aiservice.model.ProductDTO;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.embedding.EmbeddingModel;
-import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Service;
 
@@ -21,13 +20,13 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AiasService {
     private final ChatClient chatClient;
-    private  EmbeddingModel embeddingModel;
-    private  VectorStore vectorStore;
+    private EmbeddingModel embeddingModel;
+    private VectorStore vectorStore;
     private final ProductclientsFeign productclientsFeign;
     private final OrderClientsFeign orderClientsFeign;
 
 
-    public AiasService(ChatClient.Builder chatClientbuilder, ProductclientsFeign productclientsFeign, OrderClientsFeign orderClientsFeign, EmbeddingModel embeddingModel, VectorStore vectorStore) {
+    public AiasService(ChatClient.Builder chatClientbuilder, ProductclientsFeign productclientsFeign, OrderClientsFeign orderClientsFeign) {
         this.chatClient = chatClientbuilder.build();
         this.embeddingModel = embeddingModel;
         this.vectorStore = vectorStore;
@@ -45,14 +44,6 @@ public class AiasService {
     }
 
 
-    @Tool(description = "Recuperation d'une order")
-    public String getOrderById(Long id) {
-        OrderDTO order = orderClientsFeign.getOrderById(id);
-        if (order == null) return "Aucune commande avec cet ID.";
-        int itemcount = order.getItems() != null ? order.getItems().size() : 0;
-
-        return "Commande #" + order.getOrderId() + ": " + itemcount + " articles, total €" + order.getTotalAmount();
-    }
 
     public void init() {
         // Wrap in try-catch to handle errors without crashing the chat
@@ -94,6 +85,7 @@ public class AiasService {
     }
 
 
+
     public String ragQuery(String query) {
         try {
             ensureDataLoaded();
@@ -107,25 +99,18 @@ public class AiasService {
 
             log.info("Found {} docs for '{}'", relevantDocs.size(), query);
 
-            // 3. Chat avec contexte
             return chatClient.prompt()
                     .system("""
-                    Réponds en FRANÇAIS avec ces données EXACTES :
-                    
-                    CONTESTE ===
-                    %s
-                    ===
-                    
-                    - Si pas pertinent : "Je ne trouve pas d'info précise."
-                    - Sois concis (3 phrases max).
-                    """.formatted(context.isBlank() ? "Aucune donnée" : context))
+      Assistant fintech Spring Boot. Réponds FRANÇAIS concis.
+      Utilise tools pour orders/products.
+      """)
                     .user(query)
-                    .tools(AiasService.class)
+                    .tools(this)  // Feign tools OK
                     .call()
                     .content();
 
         } catch (Exception e) {
-            log.error("RAG error", e);
+            log.error("RAG error a brother check !!!!", e);
             return chatClient.prompt()
                     .system("Pas de contexte disponible.")
                     .user(query)
@@ -135,18 +120,18 @@ public class AiasService {
 }
 
 
-//    public String aiasResponse(String querytext) {
-//        log.info("Sending query to AI service: {}", querytext);
-//
-//        return chatClient.prompt()
-//                .system("""
-//                        You are an AI assistant for a web application.
-//                        - Always answer in French.
-//                        - Be concise (max 5 sentences).
-//                        - If the question is about code, provide clear examples.
-//                        - If you don't know, say you don't know.
-//                        """)
-//                .user(querytext).call().content();
-//    }
+    public String aiasResponse(String querytext) {
+        log.info("Sending query to AI service: {}", querytext);
+
+        return chatClient.prompt()
+                .system("""
+                        You are an AI assistant for a web application.
+                        - Always answer in French.
+                        - Be concise (max 5 sentences).
+                        - If the question is about code, provide clear examples.
+                        - If you don't know, say you don't know.
+                        """)
+                .user(querytext).call().content();
+    }
 
 }

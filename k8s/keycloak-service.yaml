@@ -1,13 +1,31 @@
 apiVersion: v1
 kind: Service
 metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"name":"keycloak-service","namespace":"default"},"spec":{"ports":[{"port":9090,"protocol":"TCP","targetPort":9090}],"selector":{"app":"keycloak-service"},"type":"NodePort"}}
+  creationTimestamp: "2026-01-22T12:18:33Z"
   name: keycloak-service
+  namespace: default
+  resourceVersion: "2589"
+  uid: 6f1fac0f-c270-4bd6-bdc5-4e3a407b1248
 spec:
+  clusterIP: 10.96.30.142
+  clusterIPs:
+  - 10.96.30.142
+  externalTrafficPolicy: Cluster
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - nodePort: 31132
+    port: 9090
+    protocol: TCP
+    targetPort: 9090
   selector:
     app: keycloak-service
-  ports:
-    - protocol: TCP
-      port: 9090
-      targetPort: 9090
+  sessionAffinity: None
   type: NodePort
-  
+status:
+  loadBalancer: {}

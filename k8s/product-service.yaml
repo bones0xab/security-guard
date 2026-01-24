@@ -20,7 +20,7 @@ spec:
           image: 0xbones1/ms-product:main
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 80
+            - containerPort: 8081
               protocol: TCP
       restartPolicy: Always
       

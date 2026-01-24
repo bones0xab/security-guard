@@ -24,11 +24,11 @@ spec:
               protocol: TCP
 
           env:
-            - name: POSTGRES_DB
+            - name: SPRING_DATASOURCE_URL
               value: "jdbc:postgresql://postgres-service:5432/db_product"
-            - name: POSTGRES_USER
+            - name: SPRING_DATASOURCE_USERNAME
               value: "postgres"
-            - name: POSTGRES_PASSWORD
+            - name: SPRING_DATASOURCE_PASSWORD
               value: "postgres"
       restartPolicy: Always
       

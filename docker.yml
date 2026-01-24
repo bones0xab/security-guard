@@ -110,6 +110,8 @@ services:
       POSTGRES_USER: sonar
       POSTGRES_PASSWORD: sonar
       POSTGRES_DB: sonar
+    ports:
+      - "5434:5432"
     volumes:
       - sonardb_data:/var/lib/postgresql/data
 
@@ -150,19 +152,25 @@ services:
     depends_on:
       - prometheus
 
-#  front-end:
-#    build: ./front-end
-#    container_name: front-service
-#    ports:
-#      - 3000:3000
-#    environment:
-#        - REACT_APP_API_GATEWAY_URL=http://localhost:8080
-#        - REACT_APP_AI_SERVICE_URL=http://localhost:1337
-#        - VITE_KEYCLOAK_URL=http://localhost:9090
-#    stdin_open: true
-#    tty: true
-#    extra_hosts:
-#        - "host.docker.internal:host-gateway"
+  front-end:
+    build:
+      context: ./front-end  # ← CHEMIN VRAI DOSSIER
+      dockerfile: Dockerfile
+    container_name: front-service
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./front-end:/app  # Hot reload
+      - /app/node_modules
+    environment:
+        - REACT_APP_API_GATEWAY_URL=http://gateway-service:8080
+        - REACT_APP_AI_SERVICE_URL=http://ai-service:1337
+        - VITE_KEYCLOAK_URL=http://keycloak:9090
+    depends_on:
+      - gateway-service
+      - keycloak
+    extra_hosts:
+        - "host.docker.internal:host-gateway"
 
 volumes:
   sonarqube_data:

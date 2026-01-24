@@ -20,7 +20,10 @@ spec:
           image: quay.io/keycloak/keycloak:23.0.1
           imagePullPolicy: IfNotPresent
           args:
-            - "start-dev"
+            - start-dev
+            - --http-port=9090
+            - --hostname-strict=false
+
           ports:
             - containerPort: 9090
               protocol: TCP
