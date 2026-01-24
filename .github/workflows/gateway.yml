@@ -25,9 +25,9 @@
           with:
               path : ~/.m2/repository
               key : ${{ runner.os }}--m2-${{ hashFiles('**/pom.xml') }}
-              env:
-                SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-                SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          env:
+            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+            SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
     build-and-test:
       runs-on: ubuntu-latest
