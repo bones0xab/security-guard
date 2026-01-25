@@ -80,7 +80,7 @@
           id : meta
           uses: docker/metadata-action@v4
           with:
-            images: eu-paris-1.ocir.io/axq1vfktkjkq/ms-gateway:main
+            images: eu-paris-1.ocir.io/axq1vfktkjkq/ms-gateway
             tags: |
               type=ref,event=branch
 #              type=ref,event=tag
