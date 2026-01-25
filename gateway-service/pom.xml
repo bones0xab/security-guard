@@ -12,8 +12,6 @@
     </parent>
 
 
-
-
     <groupId>org.example</groupId>
     <artifactId>gateway-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
