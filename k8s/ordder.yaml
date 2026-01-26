@@ -15,9 +15,11 @@ spec:
       labels:
         app: order-service
     spec:
+      imagePullSecrets:
+        - name: ocir-secret  # Si privé
       containers:
         - name: order-service
-          image: 0xbones1/ms-order:main
+          image: eu-paris-1.ocir.io/axq1vfktkjkq/ms-order:main
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8082

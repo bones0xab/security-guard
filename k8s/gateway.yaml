@@ -15,9 +15,11 @@ spec:
       labels:
         app: gateway-service
     spec:
+      imagePullSecrets:
+        - name: ocir-secret  # Si privé
       containers:
         - name: gateway-service
-          image: 0xbones1/ms-gateway:main
+          image: eu-paris-1.ocir.io/axq1vfktkjkq/ms-gateway:main
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

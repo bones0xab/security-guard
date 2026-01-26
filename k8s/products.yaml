@@ -15,9 +15,11 @@ spec:
       labels:
         app: product-service
     spec:
+      imagePullSecrets:
+        - name: ocir-secret
       containers:
         - name: product-service
-          image: 0xbones1/ms-product:main
+          image: eu-paris-1.ocir.io/axq1vfktkjkq/ms-product:main
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8081
